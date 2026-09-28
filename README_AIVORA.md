@@ -2,6 +2,10 @@
 
 AIVORA is a Make.com automation project that uses Telegram as the user interface and OpenAI as the orchestration layer for prospecting and job-application workflows.
 
+## Schéma du workflow
+
+![Schéma du workflow AIVORA](Chemin.png)
+
 ## What it does
 
 ### Prospecting
