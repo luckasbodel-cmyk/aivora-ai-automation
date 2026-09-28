@@ -1,0 +1,194 @@
+{
+  "project": {
+    "name": "AIVORA",
+    "title": "AI Recruitment & Prospecting Automation",
+    "purpose": "Automatiser la prospection et la préparation/envoi de candidatures avec validation humaine.",
+    "platform": "Make.com"
+  },
+  "stack": [
+    "Telegram Bot",
+    "OpenAI",
+    "Make.com",
+    "Google Sheets",
+    "Gmail",
+    "JSON parsing"
+  ],
+  "entrypoint": {
+    "module_id": 1,
+    "module": "Telegram Bot - Watch Updates",
+    "role": "Reçoit les messages de l'utilisateur."
+  },
+  "ai_orchestration": {
+    "module_id": 2,
+    "module": "OpenAI - Generate a response",
+    "role": "Analyse le message, détermine la catégorie et génère une sortie structurée.",
+    "categories": [
+      "EMAIL",
+      "PROSPECTION",
+      "CANDIDATURE",
+      "AGENDA",
+      "AUTOMATISATION",
+      "CONTENU",
+      "GENERAL"
+    ],
+    "web_search": true,
+    "structured_outputs": true
+  },
+  "router": {
+    "module_id": 18,
+    "module": "Router",
+    "routes": [
+      {
+        "name": "PROSPECTION",
+        "condition": "OpenAI result contains type = PROSPECTION",
+        "steps": [
+          {
+            "id": 3,
+            "module": "Telegram",
+            "action": "Message de réponse / statut"
+          },
+          {
+            "id": 4,
+            "module": "Google Sheets",
+            "action": "Add a Row"
+          },
+          {
+            "id": 7,
+            "module": "JSON",
+            "action": "Parse JSON"
+          },
+          {
+            "id": 8,
+            "module": "Iterator",
+            "action": "Parcourt les entreprises trouvées"
+          },
+          {
+            "id": 9,
+            "module": "Google Sheets",
+            "action": "Ajoute les prospects"
+          },
+          {
+            "id": 16,
+            "module": "Text Aggregator",
+            "action": "Construit un résumé lisible"
+          },
+          {
+            "id": 17,
+            "module": "Telegram",
+            "action": "Envoie le résumé"
+          }
+        ],
+        "data_fields": [
+          "entreprise",
+          "poste",
+          "teletravail",
+          "type_contrat",
+          "lien",
+          "source",
+          "statut",
+          "notes"
+        ]
+      },
+      {
+        "name": "CANDIDATURE",
+        "condition": "OpenAI result contains type = CANDIDATURE",
+        "steps": [
+          {
+            "id": 21,
+            "module": "JSON",
+            "action": "Parse JSON"
+          },
+          {
+            "id": 30,
+            "module": "Google Sheets",
+            "action": "Enregistre la candidature"
+          },
+          {
+            "id": 19,
+            "module": "Telegram",
+            "action": "Affiche l'objet de l'email"
+          },
+          {
+            "id": 24,
+            "module": "Telegram",
+            "action": "Affiche l'email court"
+          },
+          {
+            "id": 25,
+            "module": "Telegram",
+            "action": "Affiche le message LinkedIn"
+          },
+          {
+            "id": 26,
+            "module": "Telegram",
+            "action": "Affiche la lettre / message complet"
+          },
+          {
+            "id": 27,
+            "module": "Telegram",
+            "action": "Demande une confirmation OUI / NON"
+          }
+        ],
+        "data_fields": [
+          "entreprise",
+          "email_destinataire",
+          "lien_candidature",
+          "message",
+          "objet_email",
+          "email_court",
+          "message_linkedin"
+        ],
+        "initial_status": "EN ATTENTE DE CONFIRMATION"
+      },
+      {
+        "name": "CONFIRMATION OUI",
+        "condition": "Message Telegram = OUI",
+        "steps": [
+          {
+            "id": 37,
+            "module": "Google Sheets",
+            "action": "Recherche la dernière candidature en attente"
+          },
+          {
+            "id": 32,
+            "module": "Google Sheets",
+            "action": "Lit les données de la ligne"
+          },
+          {
+            "id": 33,
+            "module": "Gmail",
+            "action": "Envoie l'email",
+            "guard": "Email destinataire != Non précisé"
+          },
+          {
+            "id": 38,
+            "module": "Google Sheets",
+            "action": "Met le statut à ENVOYÉ"
+          }
+        ],
+        "final_status": "ENVOYÉ"
+      }
+    ]
+  },
+  "human_in_the_loop": {
+    "enabled": true,
+    "description": "Aucun email de candidature n'est envoyé sans confirmation explicite de l'utilisateur."
+  },
+  "privacy": {
+    "status": "sanitized",
+    "removed_or_replaced": [
+      "nom personnel",
+      "numéro de téléphone",
+      "adresse email personnelle",
+      "identifiants de connexions Make",
+      "identifiant de webhook",
+      "identifiants Google Sheets"
+    ],
+    "note": "Cette version est conçue pour un portfolio GitHub et non pour être importée directement dans Make."
+  },
+  "files": {
+    "full_sanitized_blueprint": "aivora-ai-automation.blueprint.sanitized.json",
+    "workflow_diagram": "Chemin.png",
+    "readme": "README.md"
+  }
+}
